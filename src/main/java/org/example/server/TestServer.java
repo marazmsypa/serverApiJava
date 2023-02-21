@@ -9,6 +9,7 @@ import org.example.server.controller.Controller;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
@@ -36,6 +37,14 @@ public class TestServer {
 
         private final Map<String, Method> routes;
 
+        /*
+        * {
+        *   url: string,
+        *   http_type: enum,
+        *   method: Method
+        * }
+        * */
+
         private TestHandler(Controller controller) {
             this.controller = controller;
             this.routes = ControllerRoutingParser.parse(controller);
@@ -48,13 +57,14 @@ public class TestServer {
                     Method method = routes.get(url);
 
                     try {
-                        Object result = method.invoke(controller, exchange);
-                        System.out.println(result);
+                        String result = (String) method.invoke(controller, exchange);
 
-                        DataOutputStream out = new DataOutputStream(exchange.getResponseBody());
-                        out.writeUTF("<h1>Hello, Client!</h1>");
-                        out.flush();
-                        out.close();
+                        String response = "This is the response";
+
+                        exchange.sendResponseHeaders(200, response.length());
+                        OutputStream os = exchange.getResponseBody();
+                        os.write(response.getBytes());
+                        os.close();
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         throw new RuntimeException(e);
                     }

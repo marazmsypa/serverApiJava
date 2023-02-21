@@ -28,7 +28,7 @@ public class MainController implements Controller {
             try (ResultSet resultSet = statement.executeQuery(selectSql)) {
                 while (resultSet.next()) {
                     builder.append(resultSet.getString("name"));
-                    builder.append("<br />");
+                    builder.append("\n");
                 }
             }
 
@@ -39,7 +39,9 @@ public class MainController implements Controller {
     }
 
     @Get(url = "/search")
-    public void search(HttpExchange exchange) {
+    public String search(HttpExchange exchange) {
         System.out.println("Seaerch called");
+
+        return "This is the response";
     }
 }

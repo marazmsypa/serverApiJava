@@ -10,7 +10,6 @@ public class Database {
     public static Database getInstance() throws SQLException {
         if (instance == null)
             instance = new Database();
-
         return instance;
     }
 

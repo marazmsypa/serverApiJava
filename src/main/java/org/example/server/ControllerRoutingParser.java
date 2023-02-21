@@ -18,7 +18,6 @@ public class ControllerRoutingParser {
 
             if (annotation != null) {
                 method.setAccessible(true);
-
                 routes.put(annotation.url(), method);
             }
         }
