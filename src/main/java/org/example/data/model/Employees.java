@@ -25,19 +25,27 @@ public class Employees {
     private Integer subdivision_id;
     @ForeignKey
     @Column(name = "division_id")
-    private Integer divisions_id;
+    private Divisions division;
 
     public Employees() {
     }
 
-    public Employees(Integer id, String surname, String name, String patronymic, Integer code, Integer subdivision_id, Integer divisions_id) {
+    public Employees(Integer id, String surname, String name, String patronymic, Integer code, Integer subdivision_id, Divisions division) {
         this.id = id;
         this.surname = surname;
         this.name = name;
         this.patronymic = patronymic;
         this.code = code;
         this.subdivision_id = subdivision_id;
-        this.divisions_id = divisions_id;
+        this.division = division;
+    }
+
+    public Divisions getDivision() {
+        return division;
+    }
+
+    public void setDivision(Divisions division) {
+        this.division = division;
     }
 
     public Integer getId() {
@@ -88,13 +96,6 @@ public class Employees {
         this.subdivision_id = subdivision_id;
     }
 
-    public Integer getDivisions_id() {
-        return divisions_id;
-    }
-
-    public void setDivisions_id(Integer divisions_id) {
-        this.divisions_id = divisions_id;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -110,7 +111,7 @@ public class Employees {
         if (!Objects.equals(code, employees.code)) return false;
         if (!Objects.equals(subdivision_id, employees.subdivision_id))
             return false;
-        return Objects.equals(divisions_id, employees.divisions_id);
+        return Objects.equals(division, employees.division);
     }
 
     @Override
@@ -121,7 +122,7 @@ public class Employees {
         result = 31 * result + (patronymic != null ? patronymic.hashCode() : 0);
         result = 31 * result + (code != null ? code.hashCode() : 0);
         result = 31 * result + (subdivision_id != null ? subdivision_id.hashCode() : 0);
-        result = 31 * result + (divisions_id != null ? divisions_id.hashCode() : 0);
+        result = 31 * result + (division != null ? division.hashCode() : 0);
         return result;
     }
 
@@ -134,7 +135,7 @@ public class Employees {
                 ", patronymic='" + patronymic + '\'' +
                 ", code=" + code +
                 ", subdivision_id=" + subdivision_id +
-                ", divisions_id=" + divisions_id +
+                ", division=" + division +
                 '}';
     }
 }

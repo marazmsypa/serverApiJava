@@ -1,47 +1,30 @@
 package org.example.controllers;
 
 import com.sun.net.httpserver.HttpExchange;
+import org.example.data.model.Employees;
+import org.example.data.repositories.EmployeesRepository;
 import org.example.database.Database;
-import org.example.server.controller.Controller;
-import org.example.server.controller.Get;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import org.example.server.annotations.Controller;
+import org.example.server.annotations.Get;
+import org.example.server.annotations.Post;
 
 public class MainController implements Controller {
-    private final Database database;
+    private final EmployeesRepository repository;
 
     public MainController(Database database) {
-        this.database = database;
+        this.repository = new EmployeesRepository(database);
     }
 
     @Get(url = "/test")
-    public String get(HttpExchange exchange) {
-        Connection connection = database.getConnection();
-        try (Statement statement = connection.createStatement()) {
-            String selectSql = "select * from user1.groups";
+    public Employees get(HttpExchange exchange) {
+        Employees employees = repository.findById(1);
+        System.out.println(employees);
 
-            StringBuilder builder = new StringBuilder();
-
-            try (ResultSet resultSet = statement.executeQuery(selectSql)) {
-                while (resultSet.next()) {
-                    builder.append(resultSet.getString("name"));
-                    builder.append("\n");
-                }
-            }
-
-            return builder.toString();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        return employees;
     }
 
-    @Get(url = "/search")
-    public String search(HttpExchange exchange) {
-        System.out.println("Seaerch called");
-
+    @Post(url = "/search")
+    public String post(HttpExchange exchange) {
         return "This is the response";
     }
 }

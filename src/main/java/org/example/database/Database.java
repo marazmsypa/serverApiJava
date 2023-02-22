@@ -1,5 +1,7 @@
 package org.example.database;
 
+import org.example.database.config.ConnectionSettings;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -7,18 +9,19 @@ import java.sql.SQLException;
 public class Database {
     private static Database instance;
 
-    public static Database getInstance() throws SQLException {
+    public static Database getInstance(ConnectionSettings settings) throws SQLException {
         if (instance == null)
-            instance = new Database();
+            instance = new Database(settings);
         return instance;
     }
 
     private final Connection connection;
 
-    private Database() throws SQLException {
+    private Database(ConnectionSettings settings) throws SQLException {
         this.connection = DriverManager.getConnection(
-                "jdbc:mariadb://xsql-prdb-clone:3306/user1",
-                "user1", "Wsr_user1"
+                settings.url,
+                settings.user,
+                settings.password
         );
     }
 

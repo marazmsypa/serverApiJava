@@ -1,34 +1,30 @@
 package org.example;
 
-import org.example.data.model.Employees;
-import org.example.data.repositories.EmployeesRepository;
+import org.example.controllers.MainController;
 import org.example.database.Database;
+import org.example.database.config.ConnectionSettings;
+import org.example.server.TestServer;
 
+import java.io.IOException;
 import java.sql.SQLException;
-import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
         try {
-            Database database = Database.getInstance();
+            ConnectionSettings settings = new ConnectionSettings(
+                    "jdbc:mariadb://xsql-prdb-clone:3306/user1",
+                    "user1",
+                    "Wsr_user1",
+                    "user1");
 
-            EmployeesRepository repository = new EmployeesRepository(database);
+            Database database = Database.getInstance(settings);
 
-            List<Employees> employees = repository.list(Employees.class, "employees");
-
-            for (Employees e : employees) {
-                System.out.println(e);
-            }
-
-            /*List<Employees> employees = fetchEmployees(database.getConnection());
-            for (Employees e : employees) {
-                System.out.println(e);
-            }*/
-
-            /*TestServer server = new TestServer(8080);
+            TestServer server = new TestServer(8080);
             server.registerController("/", new MainController(database));
-            server.start();*/
+            server.start();
         } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

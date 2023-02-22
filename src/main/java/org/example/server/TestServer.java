@@ -1,19 +1,19 @@
 package org.example.server;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import org.example.controllers.MainController;
-import org.example.server.controller.Controller;
+import org.example.server.annotations.Controller;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public class TestServer {
     private HttpServer network;
@@ -32,18 +32,24 @@ public class TestServer {
         HttpContext context = network.createContext(uri, new TestHandler(controller));
     }
 
+    private boolean isPrimitive(Object obj) {
+        return obj instanceof Integer ||
+                obj instanceof String ||
+                obj instanceof Long ||
+                obj instanceof Short ||
+                obj instanceof Character ||
+                obj instanceof Float ||
+                obj instanceof Double ||
+                obj instanceof Boolean ||
+                obj instanceof Byte;
+    }
+
     private static class TestHandler implements HttpHandler {
         private final Controller controller;
 
-        private final Map<String, Method> routes;
+        private final List<Route> routes;
 
-        /*
-        * {
-        *   url: string,
-        *   http_type: enum,
-        *   method: Method
-        * }
-        * */
+        private final ObjectMapper mapper = new ObjectMapper();
 
         private TestHandler(Controller controller) {
             this.controller = controller;
@@ -52,23 +58,50 @@ public class TestServer {
 
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            for (String url : routes.keySet()) {
-                if (url.equals(exchange.getRequestURI().toString())) {
-                    Method method = routes.get(url);
+            try {
+//                StringBuilder buf = new StringBuilder();
+//                InputStream in = exchange.getRequestBody();
 
-                    try {
-                        String result = (String) method.invoke(controller, exchange);
+//                int c;
+//                while ((c = in.read()) != -1) {
+//                    buf.append((char) c);
+//                }
 
-                        String response = "This is the response";
+                String httpMethod = exchange.getRequestMethod();
 
-                        exchange.sendResponseHeaders(200, response.length());
-                        OutputStream os = exchange.getResponseBody();
-                        os.write(response.getBytes());
-                        os.close();
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw new RuntimeException(e);
+                for (Route currentRoute : routes) {
+                    if (currentRoute.url().equals(exchange.getRequestURI().toString()) &&
+                            currentRoute.HTTPtype().equals(httpMethod)) {
+                        Method method = currentRoute.function();
+
+                        try {
+                            Object result = method.invoke(controller, exchange);
+                            byte[] response;
+
+                            if (result instanceof byte[]) {
+                                response = (byte[]) result;
+                            } else {
+                                response = mapper
+                                        .writeValueAsString(result)
+                                        .getBytes(StandardCharsets.UTF_8);
+                            }
+
+                            OutputStream os = exchange.getResponseBody();
+
+                            exchange.sendResponseHeaders(200, response.length);
+                            os.write(response);
+
+                            os.flush();
+                            os.close();
+                            exchange.close();
+                            return;
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
+            } catch (Throwable t) {
+                t.printStackTrace(System.err);
             }
         }
     }
