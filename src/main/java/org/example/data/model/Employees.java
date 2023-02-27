@@ -5,6 +5,7 @@ import org.example.database.annotations.ForeignKey;
 import org.example.database.annotations.ID;
 import org.example.database.annotations.Table;
 
+import java.math.BigInteger;
 import java.util.Objects;
 
 @Table(name = "employees")
@@ -12,7 +13,7 @@ public class Employees {
 
     @ID
     @Column(name = "id")
-    private Integer id;
+    private BigInteger id;
     @Column(name = "surname")
     private String surname;
     @Column(name = "name")
@@ -30,7 +31,7 @@ public class Employees {
     public Employees() {
     }
 
-    public Employees(Integer id, String surname, String name, String patronymic, Integer code, Integer subdivision_id, Divisions division) {
+    public Employees(BigInteger id, String surname, String name, String patronymic, Integer code, Integer subdivision_id, Divisions division) {
         this.id = id;
         this.surname = surname;
         this.name = name;
@@ -48,11 +49,11 @@ public class Employees {
         this.division = division;
     }
 
-    public Integer getId() {
+    public BigInteger getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(BigInteger id) {
         this.id = id;
     }
 

@@ -1,6 +1,6 @@
 package org.example;
 
-import org.example.controllers.MainController;
+import org.example.controllers.EmployeesController;
 import org.example.database.Database;
 import org.example.database.config.ConnectionSettings;
 import org.example.server.TestServer;
@@ -20,14 +20,13 @@ public class Main {
             Database database = Database.getInstance(settings);
 
             TestServer server = new TestServer(8080);
-            server.registerController("/", new MainController(database));
+            server.registerController("/employees", new EmployeesController(database));
             server.start();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
     }
-
-
 }

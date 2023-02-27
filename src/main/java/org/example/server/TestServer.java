@@ -6,13 +6,17 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import org.example.server.annotations.Controller;
+import org.example.server.model.RequestData;
+import org.example.server.model.Route;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 public class TestServer {
@@ -59,23 +63,23 @@ public class TestServer {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             try {
-//                StringBuilder buf = new StringBuilder();
-//                InputStream in = exchange.getRequestBody();
-
-//                int c;
-//                while ((c = in.read()) != -1) {
-//                    buf.append((char) c);
-//                }
-
                 String httpMethod = exchange.getRequestMethod();
 
                 for (Route currentRoute : routes) {
-                    if (currentRoute.url().equals(exchange.getRequestURI().toString()) &&
+                    if (checkUrlEquals(exchange.getRequestURI(), currentRoute.url()) &&
                             currentRoute.HTTPtype().equals(httpMethod)) {
+                        RequestData requestData = RequestBodyParser.parseRequest(exchange, currentRoute.url());
+
                         Method method = currentRoute.function();
 
                         try {
-                            Object result = method.invoke(controller, exchange);
+                            Object result = switch (method.getParameterCount()) {
+                                case 0 -> method.invoke(controller);
+                                case 1 -> method.invoke(controller, requestData);
+                                case 2 -> method.invoke(controller, requestData, exchange);
+                                default -> null;
+                            };
+
                             byte[] response;
 
                             if (result instanceof byte[]) {
@@ -88,7 +92,9 @@ public class TestServer {
 
                             OutputStream os = exchange.getResponseBody();
 
+                            exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
                             exchange.sendResponseHeaders(200, response.length);
+
                             os.write(response);
 
                             os.flush();
@@ -103,6 +109,32 @@ public class TestServer {
             } catch (Throwable t) {
                 t.printStackTrace(System.err);
             }
+        }
+
+        public boolean checkUrlEquals(URI reqUrl, String checkUrl) {
+            List<String> pathChunks = filterArray(reqUrl.getPath().split("/"));
+            List<String> checkUrlChunks = filterArray(checkUrl.split("/"));
+
+            if (pathChunks.size() != checkUrlChunks.size()) {
+                return false;
+            }
+
+            for (int i = 0; i < pathChunks.size(); i++) {
+                if (!(isPath(checkUrlChunks.get(i)) ||
+                        pathChunks.get(i).equals(checkUrlChunks.get(i)))) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private boolean isPath(String chunk) {
+            return chunk.charAt(0) == '{' && chunk.charAt(chunk.length() - 1) == '}';
+        }
+
+        private List<String> filterArray(String[] arr) {
+            return Arrays.stream(arr).filter(s -> s.length() > 0).toList();
         }
     }
 }
