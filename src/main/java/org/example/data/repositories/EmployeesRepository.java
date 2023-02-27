@@ -1,6 +1,7 @@
 package org.example.data.repositories;
 
 import org.example.data.model.Employees;
+import org.example.data.repositories.internal.JdbcRepository;
 import org.example.database.Database;
 import org.example.database.QueryBuilder;
 
@@ -15,11 +16,11 @@ public class EmployeesRepository extends JdbcRepository<Employees, Integer> {
     }
 
     public Employees findByName(String name) {
-        QueryBuilder query = new QueryBuilder();
+        QueryBuilder query = new QueryBuilder(QueryBuilder.Querytype.SELECT);
 
         query.addCondition("name", "=", name);
-        query.addColumn("id");
-
         return super.findOne(query, Employees.class);
     }
+
+
 }

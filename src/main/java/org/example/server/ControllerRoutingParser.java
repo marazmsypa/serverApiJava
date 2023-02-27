@@ -3,12 +3,11 @@ package org.example.server;
 import org.example.server.annotations.Controller;
 import org.example.server.annotations.Get;
 import org.example.server.annotations.Post;
+import org.example.server.model.Route;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ControllerRoutingParser {
     public static List<Route> parse(Controller controller) {

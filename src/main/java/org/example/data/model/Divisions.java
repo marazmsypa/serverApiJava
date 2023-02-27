@@ -4,13 +4,14 @@ import org.example.database.annotations.Column;
 import org.example.database.annotations.ID;
 import org.example.database.annotations.Table;
 
+import java.math.BigInteger;
 import java.util.Objects;
 
 @Table(name = "divisions")
 public class Divisions {
     @ID
     @Column(name = "id")
-    private Integer id;
+    private BigInteger id;
 
     @Column(name = "name")
     private String name;
@@ -19,16 +20,16 @@ public class Divisions {
 
     }
 
-    public Divisions(Integer id, String name) {
+    public Divisions(BigInteger id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public Integer getId() {
+    public BigInteger getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(BigInteger id) {
         this.id = id;
     }
 
@@ -60,10 +61,7 @@ public class Divisions {
 
     @Override
     public String toString() {
-        return "Divisions{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
+        return id + ", " + name;
     }
 
 }
